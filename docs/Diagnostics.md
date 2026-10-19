@@ -495,6 +495,143 @@ same `ILoggerFactory` / `IServiceProvider` that wires the exporters
 above) so the `Meter` instances created by the stack are visible to
 the OpenTelemetry MeterProvider.
 
+### Splitting sensitive data into a separate log stream
+
+Endpoint URLs, IP addresses and ports can be confidential, for example
+for plant devices in a SCADA network. The stack logs them in ordinary
+messages at every level, including `Error`, and socket errors carry them
+in the exception message. To keep them out of general purpose logs
+without losing those messages, an application can split the logs into a
+normal stream with the addresses redacted and an opt-in sensitive
+stream that carries the complete entries.
+
+Log arguments that hold such data are wrapped in a `SensitiveValue`.
+Formatting a `SensitiveValue` yields the wrapped value, so **an
+application that does nothing gets the same log output as before**.
+
+To opt in, wrap the logger factory of the telemetry context in a
+`SensitiveDataLoggerFactory`. Its loggers:
+
+- pass entries without a `SensitiveValue` argument and without an
+  exception through unchanged, once;
+- write every other entry to its normal category, at the same level and
+  with the same `EventId`, with each `SensitiveValue` replaced by its
+  redacted text (by default `[redacted]`). The formatted message and the
+  structured key/value state are both redacted; `{OriginalFormat}` is
+  kept;
+- replace the exception of an entry in the normal category by a
+  `SensitiveDataRedactedException`. It keeps the type name of the
+  original exception (`OriginalTypeName`), the `StatusCode` of a
+  `ServiceResultException`, the `SocketError` of a `SocketException`,
+  the `HResult`, the stack trace and the inner exceptions (redacted the
+  same way), but not the messages;
+- write the original entry, with the real values and the original
+  exception, to the category `Sensitive.<category>`, for example
+  `Sensitive.Opc.Ua.Bindings.UaSCBinaryClientChannel`.
+
+The application routes the categories with the standard filters and
+providers of `Microsoft.Extensions.Logging`. A filter rule for the
+category `Sensitive` matches all sensitive categories. The following
+example writes three outputs: a debug file without addresses, an error
+sink for alerting without addresses, and a restricted store with the
+complete entries:
+
+```csharp
+sealed class AppTelemetry(ILoggerFactory loggerFactory) : TelemetryContextBase(loggerFactory);
+
+ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder
+    .SetMinimumLevel(LogLevel.Debug)
+
+    // 1. Debug file: everything at Debug and above, no sensitive categories.
+    .AddProvider(new DebugFileLoggerProvider("opcua-debug.log"))
+    .AddFilter<DebugFileLoggerProvider>("Sensitive", LogLevel.None)
+
+    // 2. Error and alerting sink: errors only, no sensitive categories.
+    .AddProvider(new AlertingLoggerProvider())
+    .AddFilter<AlertingLoggerProvider>(null, LogLevel.Error)
+    .AddFilter<AlertingLoggerProvider>("Sensitive", LogLevel.None)
+
+    // 3. Restricted store: only the sensitive categories.
+    .AddProvider(new RestrictedStoreLoggerProvider())
+    .AddFilter<RestrictedStoreLoggerProvider>(null, LogLevel.None)
+    .AddFilter<RestrictedStoreLoggerProvider>("Sensitive", LogLevel.Debug));
+
+// Disposing the SensitiveDataLoggerFactory disposes the wrapped factory.
+ITelemetryContext telemetry = new AppTelemetry(
+    new SensitiveDataLoggerFactory(loggerFactory));
+```
+
+`DebugFileLoggerProvider`, `AlertingLoggerProvider` and
+`RestrictedStoreLoggerProvider` stand for whichever `ILoggerProvider`
+implementations the application uses. A failed connect then logs:
+
+```text
+debug file / alerting sink (Opc.Ua.Bindings.UaSCBinaryClientChannel):
+  fail: CLIENTCHANNEL CONNECT FAILED via [redacted]: (null), ChannelId=0
+        System.Net.Sockets.SocketException: [redacted] (ConnectionRefused)
+           at ...
+
+restricted store (Sensitive.Opc.Ua.Bindings.UaSCBinaryClientChannel):
+  fail: CLIENTCHANNEL CONNECT FAILED via opc.tcp://10.1.2.3:4840/: (null), ChannelId=0
+        System.Net.Sockets.SocketException (111): Connection refused
+           at ...
+```
+
+Whether a socket exception message contains the remote address depends
+on the platform and the connect path; exception messages are redacted
+either way.
+
+`SensitiveDataLoggerOptions` changes the category prefix
+(`SensitiveCategoryPrefix`, default `Sensitive.`), the placeholder
+(`Placeholder`, default `[redacted]`), and whether exceptions are
+redacted (`RedactExceptions`, default `true`). Entries that carry an
+exception are split even without a `SensitiveValue`, because exception
+messages can contain addresses.
+
+Notes:
+
+- Redaction only applies to messages whose arguments are wrapped in a
+  `SensitiveValue`. The client connect, reconnect and keep-alive
+  messages of `UaSCBinaryClientChannel`, `UaSCUaBinaryTransportChannel`,
+  `TcpByteTransport` and `Session` are converted; the remaining messages
+  that log addresses are being converted step by step.
+- Scopes are pushed once, through the logger of the normal category.
+  The scope provider of the wrapped factory is shared by all categories.
+- Providers that report the exception type separately from
+  `Exception.ToString()` (for example OpenTelemetry's `exception.type`)
+  see `SensitiveDataRedactedException`. Use `OriginalTypeName` for the
+  original type.
+
+#### Marking log arguments as sensitive
+
+In stack code, declare the parameter of the `[LoggerMessage]` method as
+`SensitiveValue` and wrap the argument at the call site:
+
+```csharp
+[LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 1, Level = LogLevel.Information,
+    Message = "CLIENTCHANNEL SOCKET CONNECTING to {Url}: ChannelId={ChannelId}")]
+public static partial void UaSCClientLog1(this ILogger logger, SensitiveValue url, uint channelId);
+
+m_logger.UaSCClientLog1(new SensitiveValue(url), ChannelId);
+```
+
+`new SensitiveValue(value, redactedText)` sets a redacted text in place
+of the placeholder. `SensitiveValue.FromServiceResult(result)` redacts a
+`ServiceResult` to its status code, because its localized text and
+additional info can contain exception messages with addresses; the
+error stream keeps `BadNotConnected` instead of `[redacted]`.
+
+`SensitiveValue` formats the wrapped value with the invariant culture,
+like both logging source generators. It is deliberately a class that
+does not implement `IFormattable`: the extended source generator of
+`Microsoft.Extensions.Telemetry.Abstractions` (used by `Opc.Ua.Client`)
+converts value type and `IFormattable` arguments to strings while it
+builds the log state, before any logger could redact them. For the same
+reason, format specifiers such as `{Port:D5}` are not applied to a
+`SensitiveValue`. Use `SensitiveValue.Create(value)`, which returns
+`null` for a `null` value: a missing value is not sensitive and is
+formatted as before.
+
 ### Opt-out / no-op contexts
 
 Pass a no-op `ITelemetryContext` when telemetry is genuinely

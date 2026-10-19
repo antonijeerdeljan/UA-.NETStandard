@@ -215,7 +215,10 @@ namespace Opc.Ua.Bindings
             await m_connecting.WaitAsync(ct).ConfigureAwait(false);
             try
             {
-                m_logger.UaSCTransportLog0(m_url);
+                if (m_logger.IsEnabled(LogLevel.Information))
+                {
+                    m_logger.UaSCTransportLog0(SensitiveValue.Create(m_url));
+                }
 
                 // the new channel must be connected first because WinSock
                 // will reuse sockets and this can result in messages sent
@@ -235,7 +238,10 @@ namespace Opc.Ua.Bindings
 
                 m_channel = newChannel;
                 newChannel = null;
-                m_logger.UaSCTransportLog1(m_url);
+                if (m_logger.IsEnabled(LogLevel.Information))
+                {
+                    m_logger.UaSCTransportLog1(SensitiveValue.Create(m_url));
+                }
             }
             finally
             {
@@ -249,7 +255,10 @@ namespace Opc.Ua.Bindings
                 // close previous channel.
                 if (previousChannel != null)
                 {
-                    m_logger.UaSCTransportLog2(m_url);
+                    if (m_logger.IsEnabled(LogLevel.Debug))
+                    {
+                        m_logger.UaSCTransportLog2(SensitiveValue.Create(m_url));
+                    }
                     try
                     {
                         await previousChannel.CloseAsync(
@@ -748,15 +757,15 @@ namespace Opc.Ua.Bindings
     {
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryTransportChannel + 0, Level = LogLevel.Information,
             Message = "TransportChannel RECONNECT: Reconnecting to {Url}.")]
-        public static partial void UaSCTransportLog0(this ILogger logger, global::System.Uri? url);
+        public static partial void UaSCTransportLog0(this ILogger logger, SensitiveValue? url);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryTransportChannel + 1, Level = LogLevel.Information,
             Message = "TransportChannel RECONNECT: Reconnected to {Url}.")]
-        public static partial void UaSCTransportLog1(this ILogger logger, global::System.Uri? url);
+        public static partial void UaSCTransportLog1(this ILogger logger, SensitiveValue? url);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryTransportChannel + 2, Level = LogLevel.Debug,
             Message = "TransportChannel RECONNECT: Closing old channel to {Url}.")]
-        public static partial void UaSCTransportLog2(this ILogger logger, global::System.Uri? url);
+        public static partial void UaSCTransportLog2(this ILogger logger, SensitiveValue? url);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryTransportChannel + 3, Level = LogLevel.Debug,
             Message = "Exception while closing old channel during Reconnect.")]

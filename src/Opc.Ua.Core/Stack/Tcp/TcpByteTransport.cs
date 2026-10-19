@@ -206,7 +206,10 @@ namespace Opc.Ua.Bindings
             {
                 if (m_logger.IsEnabled(LogLevel.Debug))
                 {
-                    m_logger.TcpByteTransportLogMessage0(ex, url.IdnHost, port);
+                    m_logger.TcpByteTransportLogMessage0(
+                        ex,
+                        SensitiveValue.Create(url.IdnHost),
+                        SensitiveValue.Create(port));
                 }
                 throw;
             }
@@ -760,8 +763,8 @@ namespace Opc.Ua.Bindings
         public static partial void TcpByteTransportLogMessage0(
             this ILogger logger,
             Exception? exception,
-            string? idnHost,
-            int port);
+            SensitiveValue? idnHost,
+            SensitiveValue? port);
 
         [LoggerMessage(EventId = CoreEventIds.TcpByteTransport + 1, Level = LogLevel.Debug,
             Message = "Unexpected error closing socket.")]

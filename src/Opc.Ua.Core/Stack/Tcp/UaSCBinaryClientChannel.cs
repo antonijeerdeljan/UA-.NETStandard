@@ -226,15 +226,15 @@ namespace Opc.Ua.Bindings
                     if (m_logger.IsEnabled(LogLevel.Information))
                     {
                         m_logger.UaSCClientLog0(
-                            url,
-                            EndpointDescription.ProxyUrl.ToString(),
+                            SensitiveValue.Create(url),
+                            SensitiveValue.Create(EndpointDescription.ProxyUrl.ToString()),
                             ChannelId);
                     }
                     m_via = url = EndpointDescription.ProxyUrl;
                 }
-                else
+                else if (m_logger.IsEnabled(LogLevel.Information))
                 {
-                    m_logger.UaSCClientLog1(url, ChannelId);
+                    m_logger.UaSCClientLog1(SensitiveValue.Create(url), ChannelId);
                 }
 
                 // do not attempt reconnect on failure.
@@ -273,11 +273,14 @@ namespace Opc.Ua.Bindings
                 {
                     await transport.ConnectAsync(url, ct).ConfigureAwait(false);
 
-                    m_logger
-                        .UaSCClientLog2(
-                            url,
-                            transport.RemoteEndpoint,
-                            ChannelId);
+                    if (m_logger.IsEnabled(LogLevel.Information))
+                    {
+                        m_logger
+                            .UaSCClientLog2(
+                                SensitiveValue.Create(url),
+                                SensitiveValue.Create(transport.RemoteEndpoint),
+                                ChannelId);
+                    }
 
                     CompleteConnect(operation);
                 }
@@ -289,8 +292,8 @@ namespace Opc.Ua.Bindings
             {
                 m_logger.UaSCClientLog3(
                     exception,
-                    url,
-                    transport?.RemoteEndpoint,
+                    SensitiveValue.Create(url),
+                    SensitiveValue.Create(transport?.RemoteEndpoint),
                     ChannelId);
 
                 operation.Fault(StatusCodes.BadNotConnected);
@@ -1209,10 +1212,13 @@ namespace Opc.Ua.Bindings
                     if (existing != null)
                     {
                         Transport = null;
-                        m_logger
-                            .UaSCClientLog20(
-                                channelId,
-                                existing.RemoteEndpoint);
+                        if (m_logger.IsEnabled(LogLevel.Information))
+                        {
+                            m_logger
+                                .UaSCClientLog20(
+                                    channelId,
+                                    SensitiveValue.Create(existing.RemoteEndpoint));
+                        }
                         existing.Close();
                     }
 
@@ -1247,10 +1253,13 @@ namespace Opc.Ua.Bindings
                     try
                     {
                         await transport.ConnectAsync(m_via, default).ConfigureAwait(false);
-                        m_logger
-                            .UaSCClientLog21(
-                                transport.RemoteEndpoint,
-                                ChannelId);
+                        if (m_logger.IsEnabled(LogLevel.Information))
+                        {
+                            m_logger
+                                .UaSCClientLog21(
+                                    SensitiveValue.Create(transport.RemoteEndpoint),
+                                    ChannelId);
+                        }
 
                         // Complete connect
                         CompleteConnect(operation);
@@ -1265,7 +1274,7 @@ namespace Opc.Ua.Bindings
                         m_logger
                             .UaSCClientLog22(
                                 e,
-                                transport.RemoteEndpoint,
+                                SensitiveValue.Create(transport.RemoteEndpoint),
                                 ChannelId);
 
                         operation.Fault(StatusCodes.BadNotConnected);
@@ -1509,10 +1518,13 @@ namespace Opc.Ua.Bindings
             if (transport != null)
             {
                 Transport = null;
-                m_logger
-                    .UaSCClientLog27(
-                        channelId,
-                        transport.RemoteEndpoint);
+                if (m_logger.IsEnabled(LogLevel.Information))
+                {
+                    m_logger
+                        .UaSCClientLog27(
+                            channelId,
+                            SensitiveValue.Create(transport.RemoteEndpoint));
+                }
                 transport.Close();
             }
 
@@ -2033,23 +2045,23 @@ namespace Opc.Ua.Bindings
             Message = "CLIENTCHANNEL SOCKET CONNECTING to {Url} via {Proxy}: ChannelId={ChannelId}")]
         public static partial void UaSCClientLog0(
             this ILogger logger,
-            Uri url,
-            string? proxy,
+            SensitiveValue? url,
+            SensitiveValue? proxy,
             uint channelId);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 1, Level = LogLevel.Information,
             Message = "CLIENTCHANNEL SOCKET CONNECTING to {Url}: ChannelId={ChannelId}")]
         public static partial void UaSCClientLog1(
             this ILogger logger,
-            Uri url,
+            SensitiveValue? url,
             uint channelId);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 2, Level = LogLevel.Information,
             Message = "CLIENTCHANNEL CONNECTED via {Url}: {RemoteEndpoint}, ChannelId={ChannelId}")]
         public static partial void UaSCClientLog2(
             this ILogger logger,
-            Uri url,
-            System.Net.EndPoint? remoteEndpoint,
+            SensitiveValue? url,
+            SensitiveValue? remoteEndpoint,
             uint channelId);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 3, Level = LogLevel.Error,
@@ -2057,8 +2069,8 @@ namespace Opc.Ua.Bindings
         public static partial void UaSCClientLog3(
             this ILogger logger,
             Exception? exception,
-            Uri url,
-            System.Net.EndPoint? remoteEndpoint,
+            SensitiveValue? url,
+            SensitiveValue? remoteEndpoint,
             uint channelId);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 4, Level = LogLevel.Error,
@@ -2148,13 +2160,13 @@ namespace Opc.Ua.Bindings
         public static partial void UaSCClientLog20(
             this ILogger logger,
             uint channelId,
-            System.Net.EndPoint? remoteEndpoint);
+            SensitiveValue? remoteEndpoint);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 21, Level = LogLevel.Information,
             Message = "CLIENTCHANNEL TRANSPORT RECONNECTED: {RemoteEndpoint}, ChannelId={ChannelId}")]
         public static partial void UaSCClientLog21(
             this ILogger logger,
-            System.Net.EndPoint? remoteEndpoint,
+            SensitiveValue? remoteEndpoint,
             uint channelId);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 22, Level = LogLevel.Error,
@@ -2162,7 +2174,7 @@ namespace Opc.Ua.Bindings
         public static partial void UaSCClientLog22(
             this ILogger logger,
             Exception? exception,
-            System.Net.EndPoint? remoteEndpoint,
+            SensitiveValue? remoteEndpoint,
             uint channelId);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 23, Level = LogLevel.Error,
@@ -2192,7 +2204,7 @@ namespace Opc.Ua.Bindings
         public static partial void UaSCClientLog27(
             this ILogger logger,
             uint channelId,
-            System.Net.EndPoint? remoteEndpoint);
+            SensitiveValue? remoteEndpoint);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 28, Level = LogLevel.Warning,
             Message = "ChannelId {ChannelId}: Force reconnect reason={ServiceResult}")]

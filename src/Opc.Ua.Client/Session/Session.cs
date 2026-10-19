@@ -5400,8 +5400,8 @@ namespace Opc.Ua.Client
                     if (ServiceResult.IsBad(error))
                     {
                         m_logger.KeepAliveReadFailedServiceResultEndpointUrl(
-                            error,
-                            m_endpoint.Description?.EndpointUrl,
+                            SensitiveValue.FromServiceResult(error),
+                            SensitiveValue.Create(m_endpoint.Description?.EndpointUrl),
                             GoodPublishRequestCount,
                             OutstandingRequestCount,
                             SessionId);
@@ -5510,12 +5510,15 @@ namespace Opc.Ua.Client
                     Interlocked.Read(ref m_lastKeepAliveTimestamp));
                 // Log the configured endpoint: ClientBase.Endpoint dereferences the
                 // transport channel, which is null once the channel was detached.
-                m_logger.KEEPALIVELATEDurationMsEndpointUrl(
-                    elapsed.TotalMilliseconds,
-                    m_endpoint.Description?.EndpointUrl,
-                    GoodPublishRequestCount,
-                    OutstandingRequestCount,
-                    SessionId);
+                if (m_logger.IsEnabled(LogLevel.Information))
+                {
+                    m_logger.KEEPALIVELATEDurationMsEndpointUrl(
+                        elapsed.TotalMilliseconds,
+                        SensitiveValue.Create(m_endpoint.Description?.EndpointUrl),
+                        GoodPublishRequestCount,
+                        OutstandingRequestCount,
+                        SessionId);
+                }
             }
 
             KeepAliveEventHandler? callback = m_KeepAlive;
@@ -7497,8 +7500,8 @@ namespace Opc.Ua.Client
                 " RequestCount={Good}/{Outstanding}, SessionId={SessionId}")]
         public static partial void KeepAliveReadFailedServiceResultEndpointUrl(
             this ILogger logger,
-            ServiceResult serviceResult,
-            string? endpointUrl,
+            SensitiveValue? serviceResult,
+            SensitiveValue? endpointUrl,
             int good,
             int outstanding,
             NodeId? sessionId);
@@ -7523,7 +7526,7 @@ namespace Opc.Ua.Client
         public static partial void KEEPALIVELATEDurationMsEndpointUrl(
             this ILogger logger,
             double duration,
-            string? endpointUrl,
+            SensitiveValue? endpointUrl,
             int good,
             int outstanding,
             NodeId? sessionId);
