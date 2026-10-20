@@ -101,7 +101,7 @@ namespace Opc.Ua.Bindings
                 timeProvider)
         {
             m_telemetry = telemetry;
-            m_logger = m_telemetry.CreateLogger<UaSCUaBinaryClientChannel>();
+            m_logger = m_telemetry.CreateClassifiedLogger<UaSCUaBinaryClientChannel>();
 
             if (endpoint?.EndpointUrl == null)
             {
@@ -2033,33 +2033,41 @@ namespace Opc.Ua.Bindings
             Message = "CLIENTCHANNEL SOCKET CONNECTING to {Url} via {Proxy}: ChannelId={ChannelId}")]
         public static partial void UaSCClientLog0(
             this ILogger logger,
-            Uri url,
-            string? proxy,
+            [NetworkAddress] Uri url,
+            [NetworkAddress] string? proxy,
             uint channelId);
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 1, Level = LogLevel.Information,
             Message = "CLIENTCHANNEL SOCKET CONNECTING to {Url}: ChannelId={ChannelId}")]
         public static partial void UaSCClientLog1(
             this ILogger logger,
-            Uri url,
+            [NetworkAddress] Uri url,
             uint channelId);
 
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 2, Level = LogLevel.Information,
             Message = "CLIENTCHANNEL CONNECTED via {Url}: {RemoteEndpoint}, ChannelId={ChannelId}")]
         public static partial void UaSCClientLog2(
             this ILogger logger,
-            Uri url,
-            System.Net.EndPoint? remoteEndpoint,
+            [NetworkAddress] Uri url,
+            [NetworkAddress] System.Net.EndPoint? remoteEndpoint,
             uint channelId);
+#pragma warning restore LOGGEN036
 
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 3, Level = LogLevel.Error,
             Message = "CLIENTCHANNEL CONNECT FAILED via {Url}: {RemoteEndpoint}, ChannelId={ChannelId}")]
         public static partial void UaSCClientLog3(
             this ILogger logger,
             Exception? exception,
-            Uri url,
-            System.Net.EndPoint? remoteEndpoint,
+            [NetworkAddress] Uri url,
+            [NetworkAddress] System.Net.EndPoint? remoteEndpoint,
             uint channelId);
+#pragma warning restore LOGGEN036
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 4, Level = LogLevel.Error,
             Message = "ChannelId {ChannelId}: Could not gracefully close the channel.")]
@@ -2143,27 +2151,39 @@ namespace Opc.Ua.Bindings
             Message = "ChannelId {ChannelId}: Attempting Reconnect Now.")]
         public static partial void UaSCClientLog19(this ILogger logger, uint channelId);
 
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 20, Level = LogLevel.Information,
             Message = "ChannelId {ChannelId}: CLIENTCHANNEL TRANSPORT CLOSED ON SCHEDULED HANDSHAKE: {RemoteEndpoint}")]
         public static partial void UaSCClientLog20(
             this ILogger logger,
             uint channelId,
-            System.Net.EndPoint? remoteEndpoint);
+            [NetworkAddress] System.Net.EndPoint? remoteEndpoint);
+#pragma warning restore LOGGEN036
 
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 21, Level = LogLevel.Information,
             Message = "CLIENTCHANNEL TRANSPORT RECONNECTED: {RemoteEndpoint}, ChannelId={ChannelId}")]
         public static partial void UaSCClientLog21(
             this ILogger logger,
-            System.Net.EndPoint? remoteEndpoint,
+            [NetworkAddress] System.Net.EndPoint? remoteEndpoint,
             uint channelId);
+#pragma warning restore LOGGEN036
 
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 22, Level = LogLevel.Error,
             Message = "CLIENTCHANNEL TRANSPORT RECONNECT FAILED: {RemoteEndpoint}, ChannelId={ChannelId}")]
         public static partial void UaSCClientLog22(
             this ILogger logger,
             Exception? exception,
-            System.Net.EndPoint? remoteEndpoint,
+            [NetworkAddress] System.Net.EndPoint? remoteEndpoint,
             uint channelId);
+#pragma warning restore LOGGEN036
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 23, Level = LogLevel.Error,
             Message = "ChannelId {ChannelId}: Reconnect Failed.")]
@@ -2187,12 +2207,16 @@ namespace Opc.Ua.Bindings
             Message = "ChannelId {ChannelId}: Cannot Recover Channel")]
         public static partial void UaSCClientLog26(this ILogger logger, uint channelId);
 
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 27, Level = LogLevel.Information,
             Message = "ChannelId {ChannelId}: CLIENTCHANNEL TRANSPORT CLOSED SHUTDOWN: {RemoteEndpoint}")]
         public static partial void UaSCClientLog27(
             this ILogger logger,
             uint channelId,
-            System.Net.EndPoint? remoteEndpoint);
+            [NetworkAddress] System.Net.EndPoint? remoteEndpoint);
+#pragma warning restore LOGGEN036
 
         [LoggerMessage(EventId = CoreEventIds.UaSCBinaryClientChannel + 28, Level = LogLevel.Warning,
             Message = "ChannelId {ChannelId}: Force reconnect reason={ServiceResult}")]

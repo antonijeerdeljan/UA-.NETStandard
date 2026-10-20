@@ -57,7 +57,7 @@ namespace Opc.Ua.Bindings
         {
             m_bufferManager = bufferManager ?? throw new ArgumentNullException(nameof(bufferManager));
             m_receiveBufferSize = receiveBufferSize;
-            m_logger = telemetry.CreateLogger<WebSocketByteTransportBase>();
+            m_logger = telemetry.CreateClassifiedLogger<WebSocketByteTransportBase>();
             m_sendLock = new SemaphoreSlim(1, 1);
         }
 
@@ -723,7 +723,7 @@ namespace Opc.Ua.Bindings
     {
         [LoggerMessage(EventId = BindingsHttpsEventIds.WebSocketByteTransportBase + 0, Level = LogLevel.Debug,
             Message = "WebSocket connect to {Url} failed.")]
-        public static partial void WebSocketConnectFailed(this ILogger logger, Exception exception, Uri url);
+        public static partial void WebSocketConnectFailed(this ILogger logger, Exception exception, [NetworkAddress] Uri url);
 
         [LoggerMessage(EventId = BindingsHttpsEventIds.WebSocketByteTransportBase + 1, Level = LogLevel.Error,
             Message = "WebSocketClientByteTransport: failed to validate server TLS certificate.")]

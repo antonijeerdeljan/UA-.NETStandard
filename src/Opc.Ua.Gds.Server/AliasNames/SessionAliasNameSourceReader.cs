@@ -79,7 +79,7 @@ namespace Opc.Ua.Gds.Server.AliasNames
                 throw new ArgumentNullException(nameof(configuration));
             }
             m_telemetry = telemetry ?? throw new ArgumentNullException(nameof(telemetry));
-            m_logger = telemetry.CreateLogger<SessionAliasNameSourceReader>();
+            m_logger = telemetry.CreateClassifiedLogger<SessionAliasNameSourceReader>();
             // A server configuration has no client section, which the
             // Session requires; the copy shares certificates and trust lists.
             m_configuration = new ApplicationConfiguration(configuration)
@@ -488,11 +488,11 @@ namespace Opc.Ua.Gds.Server.AliasNames
         [LoggerMessage(EventId = GdsServerCommonEventIds.AliasNameAggregation + 0, Level = LogLevel.Warning,
             Message = "AliasName source {ApplicationUri}: reading via {DiscoveryUrl} (secure: {Secure}) failed: {Error}")]
         public static partial void AliasNameSourceConnectFailed(
-            this ILogger logger, string? applicationUri, string discoveryUrl, bool secure, string error);
+            this ILogger logger, [ApplicationUri] string? applicationUri, [NetworkAddress] string discoveryUrl, bool secure, string error);
 
         [LoggerMessage(EventId = GdsServerCommonEventIds.AliasNameAggregation + 1, Level = LogLevel.Debug,
             Message = "AliasName source {ApplicationUri}: closing the session failed: {Error}")]
         public static partial void AliasNameSourceCloseFailed(
-            this ILogger logger, string? applicationUri, string error);
+            this ILogger logger, [ApplicationUri] string? applicationUri, string error);
     }
 }

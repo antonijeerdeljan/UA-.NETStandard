@@ -88,7 +88,7 @@ namespace Opc.Ua.PubSub.Kafka.Internal
             {
                 throw new ArgumentNullException(nameof(timeProvider));
             }
-            m_logger = telemetry.CreateLogger<DekafKafkaClientAdapter>();
+            m_logger = telemetry.CreateClassifiedLogger<DekafKafkaClientAdapter>();
             m_timeProvider = timeProvider;
         }
 

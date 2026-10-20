@@ -315,6 +315,7 @@ namespace Opc.Ua.Client
             Uri? endpointUrl,
             CancellationToken ct)
         {
+            logger = logger?.WithClassifiedPassThrough();
             ITransportWaitingConnection connection = initialConnection;
             for (int attempt = 1; ; attempt++)
             {
@@ -622,7 +623,7 @@ namespace Opc.Ua.Client
                 "retrying with a fresh connection (attempt {Attempt} of {Max}).")]
         public static partial void RetryStaleReverseConnection(
             this ILogger logger,
-            Uri? endpointUrl,
+            [NetworkAddress] Uri? endpointUrl,
             StatusCode statusCode,
             int attempt,
             int max);

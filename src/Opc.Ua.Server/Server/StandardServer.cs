@@ -6046,7 +6046,7 @@ namespace Opc.Ua.Server
                 "Server hostnames.")]
         public static partial void ServerClientConnectsWithAnEndpointUrlEndpointUrl(
             this ILogger logger,
-            string? endpointUrl);
+            [NetworkAddress] string? endpointUrl);
 
         /// <summary>
         /// Logs successful session creation and the assigned session identifier.
@@ -6098,7 +6098,7 @@ namespace Opc.Ua.Server
         public static partial void RegisterServerApiFailedForEndpointUrlException(
             this ILogger logger,
             string? api,
-            Uri? endpointUrl,
+            [NetworkAddress] Uri? endpointUrl,
             string? errorMessage);
 
         /// <summary>

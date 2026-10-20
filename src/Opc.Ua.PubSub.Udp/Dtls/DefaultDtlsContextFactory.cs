@@ -130,7 +130,7 @@ namespace Opc.Ua.PubSub.Udp.Dtls
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            ILogger logger = telemetry.CreateLogger<DefaultDtlsContextFactory>();
+            ILogger logger = telemetry.CreateClassifiedLogger<DefaultDtlsContextFactory>();
             logger.CreatingDtlsContext(connection.Name, endpoint, profile.Name);
             CertificateCollection resolvedLocalCertificates = await ResolveLocalCertificatesAsync(
                     telemetry,
@@ -350,7 +350,7 @@ namespace Opc.Ua.PubSub.Udp.Dtls
         public static partial void CreatingDtlsContext(
             this ILogger logger,
             string? connection,
-            UdpEndpoint endpoint,
+            [NetworkAddress] UdpEndpoint endpoint,
             string profile);
 
         [LoggerMessage(EventId = PubSubUdpEventIds.DefaultDtlsContextFactory + 1,

@@ -220,7 +220,7 @@ namespace Opc.Ua.Robotics.Client.Intent
             m_session = session ?? throw new ArgumentNullException(nameof(session));
             ControllerId = controllerId;
             telemetry = telemetry ?? throw new ArgumentNullException(nameof(telemetry));
-            Logger = telemetry.CreateLogger<UaRobotIntentTransport>();
+            Logger = telemetry.CreateClassifiedLogger<UaRobotIntentTransport>();
             m_streaming = streaming ?? RoboticsClient.GetDefaultStreaming(session);
             m_proxy = new IntentControllerTypeClient(session, controllerId, telemetry);
             m_reconnectSource = observeReconnect ? session as ManagedSession : null;

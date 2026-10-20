@@ -65,7 +65,7 @@ namespace Opc.Ua.Gds.Server.Identity
         ];
 
         private readonly IApplicationsDatabase m_database;
-        private readonly ILogger<GdsApplicationSelfAdminProvider> m_logger;
+        private readonly ILogger m_logger;
         private readonly NamespaceTable? m_namespaces;
         private readonly Func<Certificate, bool>? m_isRegisteredCertificate;
         private readonly Func<Certificate, CancellationToken, ValueTask<bool>>? m_isRevokedCertificateAsync;
@@ -96,7 +96,8 @@ namespace Opc.Ua.Gds.Server.Identity
             Func<Certificate, CancellationToken, ValueTask<bool>>? isRevokedCertificateAsync = null)
         {
             m_database = database ?? throw new ArgumentNullException(nameof(database));
-            m_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            m_logger = (logger ?? throw new ArgumentNullException(nameof(logger)))
+                .WithClassifiedPassThrough();
             m_namespaces = namespaces;
             m_isRegisteredCertificate = isRegisteredCertificate;
             m_isRevokedCertificateAsync = isRevokedCertificateAsync;
@@ -231,7 +232,7 @@ namespace Opc.Ua.Gds.Server.Identity
             Message = "ApplicationSelfAdmin denied for {AppUri}: channel certificate {Thumbprint} is revoked.")]
         public static partial void ApplicationSelfAdminDeniedRevoked(
             this ILogger logger,
-            string appUri,
+            [ApplicationUri] string appUri,
             string thumbprint);
 
         [LoggerMessage(
@@ -240,7 +241,7 @@ namespace Opc.Ua.Gds.Server.Identity
             Message = "ApplicationSelfAdmin granted to {AppUri} (cert thumbprint {Thumbprint}).")]
         public static partial void ApplicationSelfAdminGranted(
             this ILogger logger,
-            string? appUri,
+            [ApplicationUri] string? appUri,
             string? thumbprint);
     }
 }

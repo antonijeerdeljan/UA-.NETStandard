@@ -77,7 +77,7 @@ namespace Opc.Ua.Gds.Client
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             m_options = options ?? new GdsClientOptions();
             MessageContext = configuration.CreateMessageContext();
-            m_logger = MessageContext.Telemetry.CreateLogger<ServerPushConfigurationClient>();
+            m_logger = MessageContext.Telemetry.CreateClassifiedLogger<ServerPushConfigurationClient>();
             m_sessionFactory = sessionFactory ??
                 new DefaultSessionFactory(MessageContext.Telemetry)
                 {

@@ -57,7 +57,7 @@ namespace Opc.Ua.Lds.Server.Hosting
         private readonly IRegisteredServerStore m_store;
         private readonly ILdsMulticastDiscoveryFactory? m_multicastFactory;
         private readonly ITransportBindingRegistry? m_transportBindings;
-        private readonly ILogger<LdsServerHostedService> m_logger;
+        private readonly ILogger m_logger;
         // CA2213: ApplicationInstance is IAsyncDisposable; the lifecycle here is
         // managed via the async StopAsync override which disposes m_application
         // via DisposeAsync.
@@ -83,7 +83,8 @@ namespace Opc.Ua.Lds.Server.Hosting
             m_telemetry = telemetry ?? throw new ArgumentNullException(nameof(telemetry));
             m_applicationFactory = applicationFactory ?? throw new ArgumentNullException(nameof(applicationFactory));
             m_store = store ?? throw new ArgumentNullException(nameof(store));
-            m_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            m_logger = (logger ?? throw new ArgumentNullException(nameof(logger)))
+                .WithClassifiedPassThrough();
             m_multicastFactory = multicastFactory;
             m_transportBindings = transportBindings;
         }
@@ -252,7 +253,7 @@ namespace Opc.Ua.Lds.Server.Hosting
     {
         [LoggerMessage(EventId = LdsServerEventIds.LdsServerHostedService + 0, Level = LogLevel.Information,
             Message = "OPC UA LDS listening at {Endpoint}.")]
-        public static partial void OpcUaLdsListening(this ILogger logger, string endpoint);
+        public static partial void OpcUaLdsListening(this ILogger logger, [NetworkAddress] string endpoint);
 
         [LoggerMessage(EventId = LdsServerEventIds.LdsServerHostedService + 1, Level = LogLevel.Information,
             Message = "Stopping OPC UA LDS...")]

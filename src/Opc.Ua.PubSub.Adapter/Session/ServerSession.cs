@@ -111,7 +111,7 @@ namespace Opc.Ua.PubSub.Adapter.Session
                 throw new ArgumentException(
                     "EndpointUrl must be specified.", nameof(options));
             }
-            m_logger = telemetry.CreateLogger<ServerSession>();
+            m_logger = telemetry.CreateClassifiedLogger<ServerSession>();
         }
 
         /// <summary>
@@ -755,7 +755,7 @@ namespace Opc.Ua.PubSub.Adapter.Session
                 "engine / DefaultSubscriptionEngineFactory). Monitoring is optional; continuing without it.")]
         public static partial void ModelChangeMonitoringSubscriptionManagerNotAvailable(
             this ILogger logger,
-            string? endpointUrl);
+            [NetworkAddress] string? endpointUrl);
 
         [LoggerMessage(EventId = PubSubAdapterEventIds.ServerSession + 1, Level = LogLevel.Information,
             Message = "ServerSession: model-change event monitoring is not available.")]
@@ -789,7 +789,7 @@ namespace Opc.Ua.PubSub.Adapter.Session
             Message = "Connecting external server session to {EndpointUrl} ({SecurityMode}).")]
         public static partial void ConnectingExternalServerSession(
             this ILogger logger,
-            string? endpointUrl,
+            [NetworkAddress] string? endpointUrl,
             MessageSecurityMode securityMode);
     }
 

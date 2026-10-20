@@ -82,7 +82,7 @@ namespace Opc.Ua.PubSub.Mqtt.Internal
                 throw new ArgumentNullException(nameof(timeProvider));
             }
             m_telemetry = telemetry;
-            m_logger = telemetry.CreateLogger<MqttClientAdapter>();
+            m_logger = telemetry.CreateClassifiedLogger<MqttClientAdapter>();
             m_timeProvider = timeProvider;
             m_trustedIssuerResolver = trustedIssuerResolver;
 #if NET8_0_OR_GREATER
@@ -659,8 +659,8 @@ namespace Opc.Ua.PubSub.Mqtt.Internal
             Message = "MQTT connecting to {Host}:{Port} (TLS={UseTls}, version={Version}).")]
         public static partial void MqttConnecting(
             this ILogger logger,
-            string host,
-            int port,
+            [NetworkAddress] string host,
+            [NetworkAddress] int port,
             bool useTls,
             MqttProtocolVersion version);
 

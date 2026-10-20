@@ -41,4 +41,7 @@
     <PackageReference Include="Dekaf" />
   </ItemGroup>
   <Target Name="GetPackagingOutputs" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
+  </ItemGroup>
 </Project>

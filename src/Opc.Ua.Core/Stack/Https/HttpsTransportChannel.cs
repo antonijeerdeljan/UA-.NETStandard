@@ -135,7 +135,7 @@ namespace Opc.Ua.Bindings
         {
             UriScheme = uriScheme;
             m_telemetry = telemetry;
-            m_logger = telemetry.CreateLogger<HttpsTransportChannel>();
+            m_logger = telemetry.CreateClassifiedLogger<HttpsTransportChannel>();
             m_timeProvider = timeProvider ?? TimeProvider.System;
             m_httpClientFactory = httpClientFactory ?? DefaultOpcUaHttpClientFactory.Shared;
         }
@@ -919,7 +919,7 @@ namespace Opc.Ua.Bindings
         public static partial void HttpsChannelLog0(
             this ILogger logger,
             string? channelType,
-            Uri? url);
+            [NetworkAddress] Uri? url);
 
         [LoggerMessage(EventId = CoreEventIds.HttpsTransportChannel + 1, Level = LogLevel.Error,
             Message = "Exception sending HTTPS request.")]
@@ -951,7 +951,7 @@ namespace Opc.Ua.Bindings
         public static partial void HttpsChannelLog5(
             this ILogger logger,
             string? channelType,
-            Uri? url);
+            [NetworkAddress] Uri? url);
 
         [LoggerMessage(EventId = CoreEventIds.HttpsTransportChannel + 6, Level = LogLevel.Warning,
             Message = "{ChannelType}: Bypassing IOpcUaHttpClientFactory because an OPC UA " +

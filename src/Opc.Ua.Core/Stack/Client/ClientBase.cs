@@ -50,7 +50,7 @@ namespace Opc.Ua
         /// <param name="telemetry"></param>
         public ClientBase(ITransportChannel channel, ITelemetryContext telemetry)
         {
-            m_logger = telemetry.CreateLogger<ClientBase>();
+            m_logger = telemetry.CreateClassifiedLogger<ClientBase>();
             m_eventLogger = telemetry.CreateLogger(CoreEventIds.CoreCompatibilityCategory);
             m_meter = telemetry.CreateMeter();
 

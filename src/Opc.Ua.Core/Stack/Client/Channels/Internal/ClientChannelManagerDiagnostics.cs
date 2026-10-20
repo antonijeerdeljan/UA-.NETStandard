@@ -57,7 +57,8 @@ namespace Opc.Ua
     {
         public ClientChannelManagerDiagnostics(ILogger logger)
         {
-            m_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            m_logger = (logger ?? throw new ArgumentNullException(nameof(logger)))
+                .WithClassifiedPassThrough();
         }
 
         public IReadOnlyList<ManagedChannelDiagnostic> GetDiagnostics(ChannelEntry[] snapshot)
@@ -275,7 +276,7 @@ namespace Opc.Ua
                 "Refcount={Refcount}, Participants={ParticipantCount}")]
         public static partial void ChannelManagerChannelOpened(
             this ILogger logger,
-            string endpoint,
+            [NetworkAddress] string endpoint,
             bool reverse,
             int refcount,
             int participantCount);
@@ -288,7 +289,7 @@ namespace Opc.Ua
                 "Refcount={Refcount}, Participants={ParticipantCount}")]
         public static partial void ChannelManagerChannelClosed(
             this ILogger logger,
-            string endpoint,
+            [NetworkAddress] string endpoint,
             string reason,
             int refcount,
             int participantCount);
@@ -301,7 +302,7 @@ namespace Opc.Ua
                 "Attempt={ReconnectAttempt}, Status={StatusCode}, ErrorMessage={ErrorMessage}")]
         public static partial void ChannelManagerStateChanged(
             this ILogger logger,
-            string endpoint,
+            [NetworkAddress] string endpoint,
             string previousState,
             string newState,
             int reconnectAttempt,
@@ -315,7 +316,7 @@ namespace Opc.Ua
             Message = "Reconnect started. Endpoint={Endpoint}, AttemptCount={AttemptCount}")]
         public static partial void ChannelManagerReconnectStarted(
             this ILogger logger,
-            string endpoint,
+            [NetworkAddress] string endpoint,
             int attemptCount);
 
         [LoggerMessage(
@@ -325,7 +326,7 @@ namespace Opc.Ua
             Message = "Reconnect completed. Endpoint={Endpoint}, AttemptCount={AttemptCount}, Outcome={Outcome}")]
         public static partial void ChannelManagerReconnectCompleted(
             this ILogger logger,
-            string endpoint,
+            [NetworkAddress] string endpoint,
             int attemptCount,
             string outcome);
 
@@ -337,7 +338,7 @@ namespace Opc.Ua
                 "Status={StatusCode}, ErrorMessage={ErrorMessage}")]
         public static partial void ChannelManagerReconnectFailed(
             this ILogger logger,
-            string endpoint,
+            [NetworkAddress] string endpoint,
             int attempt,
             string outcome,
             string statusCode,
@@ -351,7 +352,7 @@ namespace Opc.Ua
                 "Refcount={Refcount}, Participants={ParticipantCount}")]
         public static partial void ChannelManagerParticipantAttached(
             this ILogger logger,
-            string endpoint,
+            [NetworkAddress] string endpoint,
             string participantId,
             int refcount,
             int participantCount);
@@ -364,7 +365,7 @@ namespace Opc.Ua
                 "Refcount={Refcount}, Participants={ParticipantCount}")]
         public static partial void ChannelManagerParticipantDetached(
             this ILogger logger,
-            string endpoint,
+            [NetworkAddress] string endpoint,
             string participantId,
             int refcount,
             int participantCount);

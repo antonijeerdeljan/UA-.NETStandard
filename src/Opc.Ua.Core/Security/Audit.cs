@@ -58,6 +58,9 @@ namespace Opc.Ua.Security
             Certificate? serverCertificate,
             BinaryEncodingSupport encodingSupport)
         {
+            // The endpoint URL is classified; the caller's logger may not be
+            // created for classified values.
+            logger = logger.WithClassifiedPassThrough();
             if (endpoint != null)
             {
                 string encoding;
@@ -124,7 +127,7 @@ namespace Opc.Ua.Security
             this ILogger logger,
             string implementationInfo,
             string secureChannelId,
-            string endpointUrl,
+            [NetworkAddress] string endpointUrl,
             string securityMode,
             string? securityPolicyUri,
             string encoding);
@@ -148,7 +151,7 @@ namespace Opc.Ua.Security
             this ILogger logger,
             string implementationInfo,
             string secureChannelId,
-            string endpointUrl);
+            [NetworkAddress] string endpointUrl);
 
         [LoggerMessage(EventId = CoreEventIds.Audit + 4, Level = LogLevel.Information,
             Message = "SECURE CHANNEL RENEWED [{ImplementationInfo}] [ID={SecureChannelId}]")]

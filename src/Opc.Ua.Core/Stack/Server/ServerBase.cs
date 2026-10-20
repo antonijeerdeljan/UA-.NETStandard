@@ -92,7 +92,7 @@ namespace Opc.Ua
             ServerError = new ServiceResult(StatusCodes.BadServerHalted);
             m_requestQueue = new RequestQueue(this, 10, 100, 1000);
             m_telemetry = telemetry;
-            m_logger = m_telemetry.CreateLogger(this);
+            m_logger = m_telemetry.CreateClassifiedLogger(this);
             m_transportBindings = transportBindings;
             RequestParkingPolicy = requestParkingPolicy;
         }
@@ -2215,7 +2215,7 @@ namespace Opc.Ua
             Message = "Omitting {TokenType} token policy {SecurityPolicy} on None endpoint {EndpointUrl}: " +
                 "a compatible RSA application certificate and non-key-agreement token policy are required.")]
         public static partial void IncompatibleNoneEndpointTokenPolicy(
-            this ILogger logger, UserTokenType tokenType, string? securityPolicy, string? endpointUrl);
+            this ILogger logger, UserTokenType tokenType, string? securityPolicy, [NetworkAddress] string? endpointUrl);
 
         [LoggerMessage(EventId = CoreEventIds.ServerBase + 0, Level = LogLevel.Error,
             Message = "Unexpected error disposing transport listener {Name}.")]
@@ -2226,7 +2226,7 @@ namespace Opc.Ua
 
         [LoggerMessage(EventId = CoreEventIds.ServerBase + 1, Level = LogLevel.Information,
             Message = "Create Reverse Connection to Client at {Url}.")]
-        public static partial void ServerBaseLogMessage1(this ILogger logger, Uri url);
+        public static partial void ServerBaseLogMessage1(this ILogger logger, [NetworkAddress] Uri url);
 
         [LoggerMessage(EventId = CoreEventIds.ServerBase + 2, Level = LogLevel.Error,
             Message = "Unexpected error closing a listener {Name}.")]

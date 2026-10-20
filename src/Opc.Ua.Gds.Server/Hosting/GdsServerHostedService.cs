@@ -76,7 +76,7 @@ namespace Opc.Ua.Gds.Server.Hosting
         private readonly IKeyCredentialRequestStore? m_keyCredentialStore;
         private readonly IConfigurationDataStore? m_configurationStore;
         private readonly bool m_enableBuiltInApplicationSelfAdminProvider;
-        private readonly ILogger<GdsServerHostedService> m_logger;
+        private readonly ILogger m_logger;
 
         // CA2213: IApplicationInstance is IAsyncDisposable; the lifecycle here
         // is managed via the async StopAsync override which calls
@@ -162,7 +162,8 @@ namespace Opc.Ua.Gds.Server.Hosting
             }
             m_enableBuiltInApplicationSelfAdminProvider =
                 defaultAuthenticatorOptions.Value.EnableGdsApplicationSelfAdminProvider;
-            m_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            m_logger = (logger ?? throw new ArgumentNullException(nameof(logger)))
+                .WithClassifiedPassThrough();
             m_accessTokenProvider = accessTokenProvider;
             m_authorizationServiceManager = authorizationServiceManager;
             m_keyCredentialStore = keyCredentialStore;
@@ -794,7 +795,7 @@ namespace Opc.Ua.Gds.Server.Hosting
     {
         [LoggerMessage(EventId = GdsServerCommonEventIds.GdsServerHostedService + 0, Level = LogLevel.Information,
             Message = "GDS server listening at {Endpoint}.")]
-        public static partial void GdsServerListening(this ILogger logger, string endpoint);
+        public static partial void GdsServerListening(this ILogger logger, [NetworkAddress] string endpoint);
 
         [LoggerMessage(EventId = GdsServerCommonEventIds.GdsServerHostedService + 1, Level = LogLevel.Information,
             Message = "Stopping GDS server...")]

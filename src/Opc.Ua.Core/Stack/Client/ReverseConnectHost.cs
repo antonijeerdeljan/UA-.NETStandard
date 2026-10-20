@@ -74,7 +74,7 @@ namespace Opc.Ua
             ITransportBindingRegistry? transportBindings)
         {
             m_telemetry = telemetry;
-            m_logger = telemetry.CreateLogger<ReverseConnectHost>();
+            m_logger = telemetry.CreateClassifiedLogger<ReverseConnectHost>();
             m_transportBindings = transportBindings;
         }
 
@@ -536,14 +536,14 @@ namespace Opc.Ua
     {
         [LoggerMessage(EventId = CoreEventIds.ReverseConnectHost + 0, Level = LogLevel.Information,
             Message = "Open reverse connect listener for {Url}.")]
-        public static partial void ReverseConnectHostLogMessage0(this ILogger logger, global::System.Uri? url);
+        public static partial void ReverseConnectHostLogMessage0(this ILogger logger, [NetworkAddress] global::System.Uri? url);
 
         [LoggerMessage(EventId = CoreEventIds.ReverseConnectHost + 1, Level = LogLevel.Error,
             Message = "Could not open listener for {Url}.")]
         public static partial void ReverseConnectHostLogMessage1(
             this ILogger logger,
             global::System.Exception? exception,
-            global::System.Uri? url);
+            [NetworkAddress] global::System.Uri? url);
     }
 
 }

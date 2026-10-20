@@ -97,7 +97,7 @@ namespace Opc.Ua.Bindings
         {
             m_bufferManager = bufferManager ?? throw new ArgumentNullException(nameof(bufferManager));
             m_receiveBufferSize = receiveBufferSize;
-            m_logger = telemetry.CreateLogger<TcpByteTransport>();
+            m_logger = telemetry.CreateClassifiedLogger<TcpByteTransport>();
         }
 
         /// <summary>
@@ -760,8 +760,8 @@ namespace Opc.Ua.Bindings
         public static partial void TcpByteTransportLogMessage0(
             this ILogger logger,
             Exception? exception,
-            string? idnHost,
-            int port);
+            [NetworkAddress] string? idnHost,
+            [NetworkAddress] int port);
 
         [LoggerMessage(EventId = CoreEventIds.TcpByteTransport + 1, Level = LogLevel.Debug,
             Message = "Unexpected error closing socket.")]

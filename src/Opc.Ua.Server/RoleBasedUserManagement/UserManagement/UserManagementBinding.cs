@@ -70,7 +70,7 @@ namespace Opc.Ua.Server.UserManagement
             m_userManagement = userManagement;
             m_sessionManager = sessionManager;
             m_server = server;
-            m_logger = telemetry?.CreateLogger<UserManagementBinding>()
+            m_logger = telemetry?.CreateClassifiedLogger<UserManagementBinding>()
                 ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<UserManagementBinding>.Instance;
         }
 
@@ -527,13 +527,13 @@ namespace Opc.Ua.Server.UserManagement
             this ILogger logger,
             Exception ex,
             NodeId sessionId,
-            string userName);
+            [UserIdentity] string userName);
 
         [LoggerMessage(EventId = ServerEventIds.UserManagementBinding + 1, Level = LogLevel.Error,
             Message = "Error closing sessions for deactivated user {UserName}.")]
         public static partial void ErrorClosingSessionsForDeactivatedUserUserName(
             this ILogger logger,
             Exception ex,
-            string userName);
+            [UserIdentity] string userName);
     }
 }

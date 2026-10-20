@@ -66,7 +66,7 @@ namespace Opc.Ua.Server.Hosting
         private readonly IOpcUaServerFactory m_serverFactory;
         private readonly HostedNodeManagerLifecycle m_nodeManagerLifecycle;
         private readonly TimeProvider m_timeProvider;
-        private readonly ILogger<OpcUaServerHostedService> m_logger;
+        private readonly ILogger m_logger;
         // CA2213: ApplicationInstance is IAsyncDisposable; it is owned either
         // by this service and disposed during execution cleanup or by the shared provider.
 #pragma warning disable CA2213
@@ -117,7 +117,8 @@ namespace Opc.Ua.Server.Hosting
             m_serverFactory = serverFactory ?? throw new ArgumentNullException(nameof(serverFactory));
             m_nodeManagerLifecycle = nodeManagerLifecycle ??
                 throw new ArgumentNullException(nameof(nodeManagerLifecycle));
-            m_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            m_logger = (logger ?? throw new ArgumentNullException(nameof(logger)))
+                .WithClassifiedPassThrough();
             m_timeProvider = timeProvider ?? TimeProvider.System;
         }
 
@@ -867,7 +868,7 @@ namespace Opc.Ua.Server.Hosting
         /// </summary>
         [LoggerMessage(EventId = ServerEventIds.OpcUaServerHostedService + 1, Level = LogLevel.Information,
             Message = "OPC UA server listening at {Endpoint}.")]
-        public static partial void OPCUAServerListeningAtEndpoint(this ILogger logger, string endpoint);
+        public static partial void OPCUAServerListeningAtEndpoint(this ILogger logger, [NetworkAddress] string endpoint);
 
         /// <summary>
         /// Logs a configured user token policy that lacks a matching identity authenticator.

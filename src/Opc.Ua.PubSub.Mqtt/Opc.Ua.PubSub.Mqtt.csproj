@@ -44,4 +44,7 @@
     </Otherwise>
   </Choose>
   <Target Name="GetPackagingOutputs" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
+  </ItemGroup>
 </Project>

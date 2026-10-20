@@ -171,7 +171,7 @@ namespace Opc.Ua.PubSub.Mqtt
             m_telemetry = telemetry;
             m_timeProvider = timeProvider;
             m_diagnostics = diagnostics;
-            m_logger = telemetry.CreateLogger<MqttBrokerTransport>();
+            m_logger = telemetry.CreateClassifiedLogger<MqttBrokerTransport>();
             TransportProfileUri = DetermineTransportProfileUri(connection);
             m_topicQos = BuildTopicQosMap(connection, Options, TransportProfileUri);
             AddDefaultSubscriptions();
@@ -954,7 +954,7 @@ namespace Opc.Ua.PubSub.Mqtt
         public static partial void MqttTransportOpened(
             this ILogger logger,
             string? connection,
-            MqttEndpoint endpoint,
+            [NetworkAddress] MqttEndpoint endpoint,
             PubSubTransportDirection direction,
             string profile);
 

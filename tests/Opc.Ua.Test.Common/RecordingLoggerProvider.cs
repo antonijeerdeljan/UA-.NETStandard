@@ -30,6 +30,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 
 namespace Opc.Ua.Tests
@@ -43,15 +44,28 @@ namespace Opc.Ua.Tests
         /// Initializes a recording provider.
         /// </summary>
         /// <param name="minimumLevel">The minimum level to capture.</param>
-        public RecordingLoggerProvider(LogLevel minimumLevel = LogLevel.Trace)
+        /// <param name="formatValues">Capture the structured values as
+        /// invariant culture strings at log time instead of as objects. Use
+        /// it when the logging pipeline hands out values that are only valid
+        /// during the call, such as the redacting logger of
+        /// Microsoft.Extensions.Telemetry.</param>
+        public RecordingLoggerProvider(
+            LogLevel minimumLevel = LogLevel.Trace,
+            bool formatValues = false)
         {
             MinimumLevel = minimumLevel;
+            FormatValues = formatValues;
         }
 
         /// <summary>
         /// Gets or sets the minimum captured log level.
         /// </summary>
         public LogLevel MinimumLevel { get; set; }
+
+        /// <summary>
+        /// Gets whether structured values are captured as strings.
+        /// </summary>
+        public bool FormatValues { get; }
 
         /// <summary>
         /// Gets a snapshot of the captured records.
@@ -109,7 +123,9 @@ namespace Opc.Ua.Tests
                 {
                     foreach (KeyValuePair<string, object?> value in values)
                     {
-                        properties[value.Key] = value.Value;
+                        properties[value.Key] = m_provider.FormatValues
+                            ? Convert.ToString(value.Value, CultureInfo.InvariantCulture)
+                            : value.Value;
                     }
                 }
 

@@ -109,7 +109,7 @@ namespace Opc.Ua.PubSub.Eth
             }
             m_endpoint = endpoint;
             Direction = direction;
-            m_logger = telemetry.CreateLogger<EthernetDatagramTransport>();
+            m_logger = telemetry.CreateClassifiedLogger<EthernetDatagramTransport>();
             m_destinationMac = endpoint.Address.GetAddressBytes();
             m_discoveryMac = ResolveDiscoveryMac(options.DiscoveryMulticastAddress, m_destinationMac);
         }
@@ -448,7 +448,7 @@ namespace Opc.Ua.PubSub.Eth
         public static partial void EthernetTransportOpened(
             this ILogger logger,
             string? connection,
-            PhysicalAddress mac,
+            [NetworkAddress] PhysicalAddress mac,
             PubSubTransportDirection direction);
 
         [LoggerMessage(EventId = PubSubEthEventIds.EthernetDatagramTransport + 1, Level = LogLevel.Debug,

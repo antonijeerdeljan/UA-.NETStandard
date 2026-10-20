@@ -101,8 +101,8 @@ namespace Opc.Ua.Client
             ServerRedundancyOptions redundancyOptions = serverRedundancy ?? new ServerRedundancyOptions();
             redundancyOptions.Validate();
             m_redundancyRefreshTimeout = redundancyOptions.RefreshTimeout;
-            m_logger = logger
-                ?? throw new ArgumentNullException(nameof(logger));
+            m_logger = (logger
+                ?? throw new ArgumentNullException(nameof(logger))).WithClassifiedPassThrough();
             m_identity = identity;
             m_identityProvider = identityProvider;
             m_timeProvider = timeProvider ?? TimeProvider.System;
@@ -3484,7 +3484,7 @@ namespace Opc.Ua.Client
     {
         [LoggerMessage(EventId = ClientEventIds.ManagedSession + 9, Level = LogLevel.Information,
             Message = "ManagedSession: Connecting to {Endpoint}.")]
-        public static partial void ManagedSessionConnectingEndpoint(this ILogger logger, Uri? endpoint);
+        public static partial void ManagedSessionConnectingEndpoint(this ILogger logger, [NetworkAddress] Uri? endpoint);
 
         [LoggerMessage(EventId = ClientEventIds.ManagedSession + 10, Level = LogLevel.Information,
             Message = "ManagedSession: Connected, SessionId={SessionId}.")]
@@ -3527,7 +3527,7 @@ namespace Opc.Ua.Client
 
         [LoggerMessage(EventId = ClientEventIds.ManagedSession + 18, Level = LogLevel.Information,
             Message = "ManagedSession: Failing over to {Endpoint}.")]
-        public static partial void ManagedSessionFailingOverEndpoint(this ILogger logger, Uri? endpoint);
+        public static partial void ManagedSessionFailingOverEndpoint(this ILogger logger, [NetworkAddress] Uri? endpoint);
 
         [LoggerMessage(EventId = ClientEventIds.ManagedSession + 19, Level = LogLevel.Information,
             Message = "ManagedSession: Failover complete.")]
@@ -3601,6 +3601,6 @@ namespace Opc.Ua.Client
         public static partial void ManagedSessionPublishedEndpointNotAccepted(
             this ILogger logger,
             Exception? exception,
-            Uri? endpointUrl);
+            [NetworkAddress] Uri? endpointUrl);
     }
 }

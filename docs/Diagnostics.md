@@ -516,6 +516,187 @@ recommended** — it triggers the legacy trace fallback and can
 emit format exceptions when a non-semantic trace logger receives a
 semantic logging template.
 
+### Classified log data (network addresses, application URIs, user identities)
+
+Log messages of the stack contain values that some deployments treat as
+confidential: endpoint URLs, IP addresses, host names and ports of plant
+devices, application URIs that embed host or company names, and user
+names. The stack does not decide what is confidential. Instead it marks
+these values with a **data classification** following the redaction model
+of [`Microsoft.Extensions.Compliance.Redaction`](https://learn.microsoft.com/dotnet/core/extensions/data-redaction),
+so an application or a downstream collector can redact, hash, or route
+them.
+
+#### Data classes
+
+The taxonomy `OpcUaDataClasses` (taxonomy name `OpcUa`, namespace
+`Opc.Ua`) defines three classes, each with an attribute used on
+`[LoggerMessage]` parameters:
+
+| Class | Attribute | What belongs to it |
+|---|---|---|
+| `OpcUaDataClasses.NetworkAddress` | `[NetworkAddress]` | Where a peer or the local host can be reached: endpoint, discovery, proxy, reverse connect and broker URLs; IP addresses; host and domain names; ports; MAC addresses; `EndPoint` values; listen addresses. |
+| `OpcUaDataClasses.ApplicationUri` | `[ApplicationUri]` | Identity of an OPC UA application: `ApplicationUri`, `ServerUri`, `ProductUri` and the like. They usually embed a host name or company domain. |
+| `OpcUaDataClasses.UserIdentity` | `[UserIdentity]` | Identity of a user: user names and descriptions of user identity tokens. |
+
+Not classified: node ids, browse names, namespace URIs, security policy
+URIs, status codes, certificate thumbprints, and the text of exceptions
+and `ServiceResult`s. Exception messages can contain an address (for
+example a socket error); they are passed to the logger as the exception
+and are not redacted by this model.
+
+Rules for contributors:
+
+- A `[LoggerMessage]` parameter that carries a value of one of the
+  classes gets the attribute. The message text, level and event id do not
+  change. `ClassifiedLogMessageGuardTests` fails when a placeholder such as
+  `{EndpointUrl}`, `{Url}`, `{Port}`, `{RemoteEndpoint}`, `{ServerUri}`,
+  `{ApplicationUri}` or `{UserName}` has no classification.
+- A project with classified parameters references
+  `Microsoft.Extensions.Telemetry.Abstractions`, whose extended logging
+  source generator (`Microsoft.Gen.Logging`) replaces the standard one and
+  is the only generator that honors the attributes.
+- A class that logs a classified value creates its logger with
+  `telemetry.CreateClassifiedLogger<T>()` instead of `CreateLogger<T>()`
+  (same category name). A class that receives an `ILogger` or
+  `ILoggerFactory` from elsewhere (for example through dependency
+  injection) wraps it with `logger.WithClassifiedPassThrough()` or
+  `factory.CreateClassifiedLogger<T>()`. `ClassifiedLogMessageGuardTests`
+  checks this too. All other loggers stay exactly as the factory creates
+  them. Free-form `logger.LogXxx("...")`
+  calls cannot carry a classification and must not log classified values.
+  A `Logger<T>` from dependency injection may hide a redacting logger, so
+  it receives the original message state: the text is unchanged and
+  redaction applies, but without redaction its structured key/value pairs
+  lack the classified values. Creating the logger from the telemetry
+  context or from the `ILoggerFactory` avoids that.
+
+#### Default: nothing changes
+
+The extended generator only formats a classified value after the redacting
+logger of `Microsoft.Extensions.Telemetry` has processed it. To keep the
+default output unchanged, the classes that log classified values use a
+logger that hands the raw value to loggers that do not redact (see
+`ClassifiedLogging`). An application that configures nothing gets the
+same text and the same structured key/value pairs as before:
+
+```csharp
+ILoggerFactory loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+// ... used by the ITelemetryContext of the application
+```
+
+```text
+info: Opc.Ua.Bindings.UaSCUaBinaryClientChannel[491]
+      CLIENTCHANNEL SOCKET CONNECTING to opc.tcp://10.1.2.3:4840/: ChannelId=0
+dbug: Opc.Ua.Bindings.TcpByteTransport[350]
+      Failed to connect socket to 10.1.2.3:4840.
+```
+
+#### Hide network addresses
+
+Enable redaction in the logging pipeline and register a redactor for the
+classes to hide. Values of other classes go to the fallback redactor,
+which is the erasing redactor unless set otherwise:
+
+```csharp
+services.AddLogging(b => b.AddConsole().EnableRedaction());
+services.AddRedaction(r => r
+    .SetRedactor<ErasingRedactor>(
+        new DataClassificationSet(OpcUaDataClasses.NetworkAddress))
+    // keep application URIs and user names readable:
+    .SetFallbackRedactor<NullRedactor>());
+// NullRedactor would otherwise print "value:TagName" (see below).
+services.Configure<LoggerRedactionOptions>(o => o.ApplyDiscriminator = false);
+```
+
+```text
+info: Opc.Ua.Bindings.UaSCUaBinaryClientChannel[491]
+      CLIENTCHANNEL SOCKET CONNECTING to : ChannelId=0
+dbug: Opc.Ua.Bindings.TcpByteTransport[350]
+      Failed to connect socket to :.
+```
+
+To keep log entries of the same peer correlatable without revealing it,
+use the HMAC redactor of `Microsoft.Extensions.Compliance.Redaction`
+instead of erasing (the key is a base64 secret of at least 44 characters
+kept out of source control):
+
+```csharp
+services.AddRedaction(r => r.SetHmacRedactor(
+    o =>
+    {
+        o.Key = configuration["Logging:RedactionKey"];
+        o.KeyId = 1;
+    },
+    new DataClassificationSet(OpcUaDataClasses.NetworkAddress)));
+```
+
+The redacting logger passes `"<value>:<TagName>"` to the redactor when
+`LoggerRedactionOptions.ApplyDiscriminator` is `true` (the default), so
+the same address in two different parameters hashes differently. A
+redactor that copies its input therefore prints the tag name suffix;
+turn the discriminator off when using one.
+
+Applications that already call `EnableRedaction()` for their own data are
+affected too: a classified value without a registered redactor goes to the
+fallback redactor, which erases it by default. With no redactors at all, the
+values are copied with the discriminator, so the text shows
+`opc.tcp://10.1.2.3:4840/plant:Url on port 4840:Port`. Register a redactor
+for the OPC UA classes (or `SetFallbackRedactor<NullRedactor>()` with the
+discriminator turned off) to choose the result.
+
+The classification is only visible inside the process: logging providers
+and exporters (console, files, OpenTelemetry, ...) receive the values, not
+their classes. Redaction therefore has to be enabled in the logging
+pipeline of the application, before the providers.
+
+#### Separate restricted log
+
+In one logging pipeline all providers see the same values, because
+redaction happens before the providers. To write a general log without
+addresses and a restricted log with them, build two pipelines and combine
+them with `RestrictedDataLoggerFactory`. Every entry goes to the general
+pipeline; the entries that carry a value of the selected classes also go,
+unredacted, to the restricted one:
+
+```csharp
+// General pipeline: redacts network addresses.
+var general = new ServiceCollection()
+    .AddLogging(b => b.AddConsole().EnableRedaction())
+    .AddRedaction(r => r
+        .SetRedactor<ErasingRedactor>(
+            new DataClassificationSet(OpcUaDataClasses.NetworkAddress))
+        .SetFallbackRedactor<NullRedactor>())
+    .Configure<LoggerRedactionOptions>(o => o.ApplyDiscriminator = false)
+    .BuildServiceProvider();
+
+// Restricted pipeline: no redaction, written to a protected location.
+ILoggerFactory restricted = LoggerFactory.Create(b => b.AddProvider(restrictedFileProvider));
+
+ILoggerFactory loggerFactory = new RestrictedDataLoggerFactory(
+    general.GetRequiredService<ILoggerFactory>(),
+    restricted,
+    OpcUaDataClasses.NetworkAddress);
+// ... used by the ITelemetryContext of the application
+```
+
+```text
+general:    CLIENTCHANNEL SOCKET CONNECTING to : ChannelId=0
+restricted: CLIENTCHANNEL SOCKET CONNECTING to opc.tcp://10.1.2.3:4840/: ChannelId=0
+```
+
+The restricted pipeline must not enable redaction. `RestrictedDataLoggerFactory`
+forwards synchronously and does not own or dispose the two pipelines.
+
+#### Relation to `Opc.Ua.Redaction`
+
+The older `Redact.Create(value)` / `RedactionStrategies.SetStrategy(...)`
+API applies one process-wide strategy to the values it wraps (certificate
+store paths, some exceptions). It stays as it is. Where a wrapped value is
+also a network address (for example the certificate domain check), the
+parameter is classified as well, and a configured redactor receives the
+text the strategy produced.
+
 ### Temporary compromises
 
 A handful of static utilities still exist and take the telemetry

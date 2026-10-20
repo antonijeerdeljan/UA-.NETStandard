@@ -293,7 +293,7 @@ namespace Opc.Ua.Client
             m_timeProvider = timeProvider ?? TimeProvider.System;
             m_securityPolicies = securityPolicies ?? SecurityPolicies.Default;
             m_telemetry = messageContext.Telemetry;
-            m_logger = m_telemetry.CreateLogger<Session>();
+            m_logger = m_telemetry.CreateClassifiedLogger<Session>();
 
             SessionFactory ??= new DefaultSessionFactory(m_telemetry)
             {
@@ -7498,7 +7498,7 @@ namespace Opc.Ua.Client
         public static partial void KeepAliveReadFailedServiceResultEndpointUrl(
             this ILogger logger,
             ServiceResult serviceResult,
-            string? endpointUrl,
+            [NetworkAddress] string? endpointUrl,
             int good,
             int outstanding,
             NodeId? sessionId);
@@ -7523,7 +7523,7 @@ namespace Opc.Ua.Client
         public static partial void KEEPALIVELATEDurationMsEndpointUrl(
             this ILogger logger,
             double duration,
-            string? endpointUrl,
+            [NetworkAddress] string? endpointUrl,
             int good,
             int outstanding,
             NodeId? sessionId);

@@ -97,7 +97,7 @@ namespace Opc.Ua.Configuration
         public ApplicationInstance(ITelemetryContext? telemetry)
         {
             m_telemetry = telemetry;
-            m_logger = telemetry?.CreateLogger<ApplicationInstance>() ?? NullLogger<ApplicationInstance>.Instance;
+            m_logger = telemetry?.CreateClassifiedLogger<ApplicationInstance>() ?? NullLogger<ApplicationInstance>.Instance;
             DisableCertificateAutoCreation = false;
         }
 
@@ -1312,7 +1312,7 @@ namespace Opc.Ua.Configuration
         public static partial void CertificateValidatedForApplicationUri(
             this ILogger logger,
             Certificate certificate,
-            string? applicationUri);
+            [ApplicationUri] string? applicationUri);
 
         [LoggerMessage(EventId = ConfigurationEventIds.ApplicationInstance + 11, Level = LogLevel.Information,
             Message = "Check domains in certificate.")]
@@ -1324,7 +1324,7 @@ namespace Opc.Ua.Configuration
 
         [LoggerMessage(EventId = ConfigurationEventIds.ApplicationInstance + 13, Level = LogLevel.Information,
             Message = " {ServerDomainName}")]
-        public static partial void ServerDomainName(this ILogger logger, string serverDomainName);
+        public static partial void ServerDomainName(this ILogger logger, [NetworkAddress] string serverDomainName);
 
         [LoggerMessage(EventId = ConfigurationEventIds.ApplicationInstance + 14, Level = LogLevel.Information,
             Message = "Certificate Domain names:")]
@@ -1332,7 +1332,7 @@ namespace Opc.Ua.Configuration
 
         [LoggerMessage(EventId = ConfigurationEventIds.ApplicationInstance + 15, Level = LogLevel.Information,
             Message = " {ClientDomainName}")]
-        public static partial void ClientDomainName(this ILogger logger, string clientDomainName);
+        public static partial void ClientDomainName(this ILogger logger, [NetworkAddress] string clientDomainName);
 
         [LoggerMessage(EventId = ConfigurationEventIds.ApplicationInstance + 16, Level = LogLevel.Information,
             Message = "Creating application instance certificate.")]
@@ -1357,7 +1357,7 @@ namespace Opc.Ua.Configuration
         public static partial void CertificateCreatedForApplicationUri(
             this ILogger logger,
             Certificate certificate,
-            string? applicationUri);
+            [ApplicationUri] string? applicationUri);
 
         [LoggerMessage(EventId = ConfigurationEventIds.ApplicationInstance + 20, Level = LogLevel.Information,
             Message = "Deleting application instance certificate {Certificate} and private key.")]

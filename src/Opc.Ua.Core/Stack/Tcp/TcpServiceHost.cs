@@ -84,7 +84,7 @@ namespace Opc.Ua.Bindings
             // This is needed because the binding always requires a default
             // constructor construction. So the telemetry context is not available
             // until we are here.
-            ILogger logger = serverBase.MessageContext.Telemetry.CreateLogger<TcpServiceHost>();
+            ILogger logger = serverBase.MessageContext.Telemetry.CreateClassifiedLogger<TcpServiceHost>();
 
             for (int ii = 0; ii < baseAddresses.Count; ii++)
             {
@@ -166,7 +166,7 @@ namespace Opc.Ua.Bindings
             Message = "Failed to create endpoint {Uri} because the transport profile is unsupported.")]
         public static partial void TcpServiceHostLogMessage0(
             this ILogger logger,
-            global::Opc.Ua.Redaction.RedactionWrapper<global::System.UriBuilder> uri);
+            [NetworkAddress] global::Opc.Ua.Redaction.RedactionWrapper<global::System.UriBuilder> uri);
     }
 
 }

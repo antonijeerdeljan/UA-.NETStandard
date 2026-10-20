@@ -538,6 +538,6 @@ namespace Opc.Ua.Gds.Server
 
         [LoggerMessage(EventId = GdsServerCommonEventIds.GlobalDiscoverySampleServer + 1, Level = LogLevel.Information,
             Message = "X509 Token Accepted: {Identity} as {Role}")]
-        public static partial void X509TokenAccepted(this ILogger logger, string identity, Role role);
+        public static partial void X509TokenAccepted(this ILogger logger, [UserIdentity] string identity, Role role);
     }
 }

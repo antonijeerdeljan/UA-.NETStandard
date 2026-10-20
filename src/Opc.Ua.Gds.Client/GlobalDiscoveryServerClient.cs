@@ -86,7 +86,7 @@ namespace Opc.Ua.Gds.Client
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             m_options = options ?? new GdsClientOptions();
             MessageContext = configuration.CreateMessageContext();
-            m_logger = MessageContext.Telemetry.CreateLogger<GlobalDiscoveryServerClient>();
+            m_logger = MessageContext.Telemetry.CreateClassifiedLogger<GlobalDiscoveryServerClient>();
             m_backgroundWork = new BackgroundTaskScope(
                 nameof(GlobalDiscoveryServerClient), MessageContext.Telemetry);
             m_sessionFactory = sessionFactory ??
@@ -1112,7 +1112,7 @@ namespace Opc.Ua.Gds.Client
 
         [LoggerMessage(EventId = GdsClientCommonEventIds.GdsClientConnection + 2, Level = LogLevel.Information,
             Message = "Connected to {EndpointUrl}.")]
-        public static partial void ConnectedToEndpoint(this ILogger logger, string? endpointUrl);
+        public static partial void ConnectedToEndpoint(this ILogger logger, [NetworkAddress] string? endpointUrl);
 
         [LoggerMessage(EventId = GdsClientCommonEventIds.GdsClientConnection + 3, Level = LogLevel.Error,
             Message = "Subscriber threw in ServerStatusChanged handler.")]

@@ -47,14 +47,15 @@ namespace Opc.Ua.Pcap.Audit
 
         private static readonly Lock s_frameCapturedRateLimitLock = new();
 
-        private readonly ILogger<LoggerPcapAuditSink> m_logger;
+        private readonly ILogger m_logger;
 
         /// <summary>
         /// Constructs a logger-backed Pcap audit sink.
         /// </summary>
         public LoggerPcapAuditSink(ILogger<LoggerPcapAuditSink> logger)
         {
-            m_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            m_logger = (logger ?? throw new ArgumentNullException(nameof(logger)))
+                .WithClassifiedPassThrough();
         }
 
         /// <inheritdoc/>
@@ -111,7 +112,7 @@ namespace Opc.Ua.Pcap.Audit
             PcapAuditEventKind kind,
             string? sessionId,
             string? resourcePath,
-            string? remoteEndpoint);
+            [NetworkAddress] string? remoteEndpoint);
     }
 
 }

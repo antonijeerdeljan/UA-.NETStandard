@@ -113,7 +113,7 @@ namespace Opc.Ua.OpenUsd.Client
             m_remoteSessionFactory = options.RemoteSessionFactory;
             m_ownsSession = ownsSession;
             m_telemetry = telemetry;
-            m_logger = telemetry?.CreateLogger<OpenUsdConnector>()
+            m_logger = telemetry?.CreateClassifiedLogger<OpenUsdConnector>()
                 ?? (ILogger)Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
             m_ns = (ushort)m_session.NamespaceUris.GetIndex(OpenUsdModel.NamespaceUri);
             m_representationTypeId = new NodeId(OpenUsdModel.RepresentationTypeId, m_ns);

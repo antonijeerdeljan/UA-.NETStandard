@@ -97,7 +97,8 @@ namespace Opc.Ua.Lds.Server
         {
             m_store = store ?? throw new ArgumentNullException(nameof(store));
             m_loopbackOnly = loopbackOnly;
-            m_logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
+            m_logger = (logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance)
+                .WithClassifiedPassThrough();
         }
 
         /// <summary>
@@ -441,6 +442,6 @@ namespace Opc.Ua.Lds.Server
 
         [LoggerMessage(EventId = LdsServerEventIds.MulticastDiscovery + 4, Level = LogLevel.Debug,
             Message = "Failed to build mDNS profile for {Url}.")]
-        public static partial void FailedToBuildMdnsProfile(this ILogger logger, Exception ex, string url);
+        public static partial void FailedToBuildMdnsProfile(this ILogger logger, Exception ex, [NetworkAddress] string url);
     }
 }

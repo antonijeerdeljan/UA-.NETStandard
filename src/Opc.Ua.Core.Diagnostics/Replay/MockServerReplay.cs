@@ -61,7 +61,7 @@ namespace Opc.Ua.Pcap.Replay
 
             m_source = source;
             m_loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
-            m_logger = m_loggerFactory.CreateLogger<MockServerReplay>();
+            m_logger = m_loggerFactory.CreateClassifiedLogger<MockServerReplay>();
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace Opc.Ua.Pcap.Replay
     {
         [LoggerMessage(EventId = CoreDiagnosticsEventIds.MockServerReplay + 0, Level = LogLevel.Information,
             Message = "Mock-server replay listening on {ListenUri}.")]
-        public static partial void MockServerReplayListening(this ILogger logger, Uri listenUri);
+        public static partial void MockServerReplayListening(this ILogger logger, [NetworkAddress] Uri listenUri);
     }
 
 }

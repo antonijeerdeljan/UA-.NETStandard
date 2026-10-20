@@ -153,7 +153,7 @@ namespace Opc.Ua.Server
             m_securityPolicies =
                 (server as ISecurityPolicyRegistryProvider)?.SecurityPolicyRegistry
                 ?? SecurityPolicies.Default;
-            m_eventLogger = server.Telemetry.CreateLogger(
+            m_eventLogger = server.Telemetry.CreateClassifiedLogger(
                 ServerCompatibilityEventIds.CategoryName);
             ClientNonce = clientNonce;
             m_serverNonce = serverNonce;
@@ -2133,7 +2133,7 @@ namespace Opc.Ua.Server
             string sessionId,
             string sessionName,
             string secureChannelId,
-            string identity);
+            [UserIdentity] string identity);
 
         /// <summary>
         /// Logs the server-side cause of a user identity token decryption failure that is

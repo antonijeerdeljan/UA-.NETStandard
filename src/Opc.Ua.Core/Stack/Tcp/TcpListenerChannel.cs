@@ -103,7 +103,7 @@ namespace Opc.Ua.Bindings
                 telemetry,
                 timeProvider)
         {
-            m_logger = telemetry.CreateLogger<TcpListenerChannel>();
+            m_logger = telemetry.CreateClassifiedLogger<TcpListenerChannel>();
             Listener = listener;
 
             // Bridge the base channel's token-activated callback to the
@@ -1404,13 +1404,17 @@ namespace Opc.Ua.Bindings
     /// </summary>
     internal static partial class TcpListenerChannelLog
     {
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.TcpListenerChannel + 0, Level = LogLevel.Debug,
             Message = "{Channel} TRANSPORT ATTACHED: {RemoteEndpoint}, ChannelId={ChannelId}")]
         public static partial void TcpListenChannelLog0(
             this ILogger logger,
             string channel,
-            EndPoint? remoteEndpoint,
+            [NetworkAddress] EndPoint? remoteEndpoint,
             uint channelId);
+#pragma warning restore LOGGEN036
 
         [LoggerMessage(EventId = CoreEventIds.TcpListenerChannel + 1, Level = LogLevel.Information,
             Message = "{Channel} ChannelId={ChannelId}: closing for certificate rotation (thumbprint {Thumbprint}).")]
@@ -1435,27 +1439,35 @@ namespace Opc.Ua.Bindings
             uint id,
             string message);
 
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.TcpListenerChannel + 4, Level = LogLevel.Error,
             Message = "{Channel} ForceChannelFault Transport={RemoteEndpoint}, ChannelId={ChannelId}, " +
                 "TokenId={TokenId}, Reason={Reason}")]
         public static partial void TcpListenChannelLog4(
             this ILogger logger,
             string channel,
-            EndPoint? remoteEndpoint,
+            [NetworkAddress] EndPoint? remoteEndpoint,
             uint channelId,
             uint tokenId,
             ServiceResult reason);
+#pragma warning restore LOGGEN036
 
+        // EndPoint does not override ToString, but the IPEndPoint and DnsEndPoint
+        // values logged here do, so the text is the same as with the standard generator.
+#pragma warning disable LOGGEN036
         [LoggerMessage(EventId = CoreEventIds.TcpListenerChannel + 5, Level = LogLevel.Information,
             Message = "{Channel} Cleanup Transport={RemoteEndpoint}, ChannelId={ChannelId}, " +
                 "TokenId={TokenId}, Reason={Reason}")]
         public static partial void TcpListenChannelLog5(
             this ILogger logger,
             string channel,
-            EndPoint? remoteEndpoint,
+            [NetworkAddress] EndPoint? remoteEndpoint,
             uint channelId,
             uint tokenId,
             string reason);
+#pragma warning restore LOGGEN036
 
         [LoggerMessage(EventId = CoreEventIds.TcpListenerChannel + 6, Level = LogLevel.Debug,
             Message = "ChannelId {ChannelId}: SendErrorMessage={Status}")]

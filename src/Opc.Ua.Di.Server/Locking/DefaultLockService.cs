@@ -59,7 +59,7 @@ namespace Opc.Ua.Di.Server.Locking
         private static readonly TimeSpan s_defaultLockDuration = TimeSpan.FromMinutes(5);
 
         private readonly ConcurrentDictionary<NodeId, Record> m_records = new();
-        private readonly ILogger<DefaultLockService>? m_logger;
+        private readonly ILogger? m_logger;
         private readonly TimeProvider m_timeProvider;
         private ISessionManager? m_sessionManager;
         private SessionEventHandler? m_sessionClosingHandler;
@@ -75,7 +75,7 @@ namespace Opc.Ua.Di.Server.Locking
         {
             LockDuration = lockDuration ?? s_defaultLockDuration;
             m_timeProvider = timeProvider ?? TimeProvider.System;
-            m_logger = logger;
+            m_logger = logger?.WithClassifiedPassThrough();
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace Opc.Ua.Di.Server.Locking
             this ILogger logger,
             NodeId elementId,
             NodeId sessionId,
-            string? user,
+            [UserIdentity] string? user,
             string? context);
 
         [LoggerMessage(EventId = DiServerEventIds.DefaultLockService + 1, Level = LogLevel.Information,

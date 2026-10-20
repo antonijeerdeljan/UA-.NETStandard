@@ -103,7 +103,7 @@ namespace Opc.Ua
             m_openStore = openStore ?? (store => store.OpenStore(telemetry));
             m_copyNativeCertificate = copyNativeCertificate ??
                 throw new ArgumentNullException(nameof(copyNativeCertificate));
-            m_logger = telemetry.CreateLogger<CertificateValidationCore>();
+            m_logger = telemetry.CreateClassifiedLogger<CertificateValidationCore>();
             m_validatedCertificates = [];
             m_stores = [];
             m_state = new TrustListState(null, null, default);
@@ -2319,7 +2319,7 @@ namespace Opc.Ua
             Message = "The domain '{Url}' is not listed in the server certificate.")]
         public static partial void CertificateValidationLog2(
             this ILogger logger,
-            global::Opc.Ua.Redaction.RedactionWrapper<global::System.Uri> url);
+            [NetworkAddress] global::Opc.Ua.Redaction.RedactionWrapper<global::System.Uri> url);
 
         [LoggerMessage(EventId = CoreEventIds.CertificateValidationCore + 3, Level = LogLevel.Error,
             Message = "Certificate {Certificate} rejected. Reason={ServiceResult}.")]

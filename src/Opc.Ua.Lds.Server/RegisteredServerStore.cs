@@ -71,7 +71,8 @@ namespace Opc.Ua.Lds.Server
         /// <see cref="TimeProvider.System"/> when <c>null</c>.</param>
         public RegisteredServerStore(ILogger? logger = null, TimeProvider? timeProvider = null)
         {
-            m_logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
+            m_logger = (logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance)
+                .WithClassifiedPassThrough();
             m_timeProvider = timeProvider ?? TimeProvider.System;
             m_lastCounterResetTime = m_timeProvider.GetUtcNow().UtcDateTime;
         }
@@ -570,7 +571,7 @@ namespace Opc.Ua.Lds.Server
             Message = "LDS: removed registration for {Uri} (IsOnline={Online}, SemaphoreOk={Sem}).")]
         public static partial void LdsRemovedRegistration(
             this ILogger logger,
-            string uri,
+            [ApplicationUri] string uri,
             bool online,
             bool sem);
     }

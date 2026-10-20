@@ -453,7 +453,7 @@ namespace Opc.Ua.Identity
                 return;
             }
 
-            ILogger logger = telemetry.CreateLogger(typeof(ClientIdentityProviderExtensions));
+            ILogger logger = telemetry.CreateClassifiedLogger(typeof(ClientIdentityProviderExtensions));
             if (userNameCount > 1)
             {
                 logger.EndpointDescriptionAdvertisesCountUSERNAMEUserTokenPoliciesPer(userNameCount);
@@ -675,7 +675,7 @@ namespace Opc.Ua.Identity
         public static partial void EndpointDescriptionAdvertisesCountISSUEDTOKENUserTokenPoliciesIssuerEndpointUrl(
             this ILogger logger,
             int count,
-            string url);
+            [NetworkAddress] string url);
     }
 
 }

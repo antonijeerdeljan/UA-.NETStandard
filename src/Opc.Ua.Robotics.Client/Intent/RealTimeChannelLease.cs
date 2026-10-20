@@ -234,7 +234,7 @@ namespace Opc.Ua.Robotics.Client.Intent
         public static partial void ChannelLeaseGranted(
             this ILogger logger,
             string channelId,
-            string endpointUrl,
+            [NetworkAddress] string endpointUrl,
             DateTimeUtc leaseExpiry);
 
         [LoggerMessage(

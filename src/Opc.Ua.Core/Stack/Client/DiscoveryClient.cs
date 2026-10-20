@@ -807,7 +807,7 @@ namespace Opc.Ua
     {
         [LoggerMessage(EventId = CoreEventIds.DiscoveryClient + 0, Level = LogLevel.Warning,
             Message = "Discovery endpoint contains invalid Url: {EndpointUrl}")]
-        public static partial void DiscoveryClientLogMessage0(this ILogger logger, string? endpointUrl);
+        public static partial void DiscoveryClientLogMessage0(this ILogger logger, [NetworkAddress] string? endpointUrl);
     }
 
 }

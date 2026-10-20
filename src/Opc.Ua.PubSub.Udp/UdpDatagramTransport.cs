@@ -193,7 +193,7 @@ namespace Opc.Ua.PubSub.Udp
             m_diagnostics = diagnostics;
             m_useConnectedUnicastClient = useConnectedUnicastClient;
             m_trackLastSeenUnicastPeer = trackLastSeenUnicastPeer;
-            m_logger = telemetry.CreateLogger<UdpDatagramTransport>();
+            m_logger = telemetry.CreateClassifiedLogger<UdpDatagramTransport>();
             m_repeater = new UdpMessageRepeater(
                 options.MessageRepeatCount,
                 options.MessageRepeatDelay,
@@ -1340,7 +1340,7 @@ namespace Opc.Ua.PubSub.Udp
         public static partial void UdpTransportOpened(
             this ILogger logger,
             string? connection,
-            UdpEndpoint endpoint,
+            [NetworkAddress] UdpEndpoint endpoint,
             PubSubTransportDirection direction);
 
         [LoggerMessage(EventId = PubSubUdpEventIds.UdpDatagramTransport + 1, Level = LogLevel.Debug,
@@ -1371,7 +1371,7 @@ namespace Opc.Ua.PubSub.Udp
             this ILogger logger,
             Exception exception,
             string? connection,
-            string endpoint);
+            [NetworkAddress] string endpoint);
 
         [LoggerMessage(EventId = PubSubUdpEventIds.UdpDatagramTransport + 5, Level = LogLevel.Warning,
             Message = "UDP receive on connection '{Connection}' raised {Code}; continuing.")]
@@ -1469,7 +1469,7 @@ namespace Opc.Ua.PubSub.Udp
             this ILogger logger,
             Exception exception,
             string? connection,
-            string endpoint);
+            [NetworkAddress] string endpoint);
 
         [LoggerMessage(EventId = PubSubUdpEventIds.UdpDatagramTransport + 19, Level = LogLevel.Debug,
             Message = "Setting the multicast send interface failed for connection '{Connection}'.")]
